@@ -6,7 +6,10 @@ class RamenModel {
   String latitude;
   String longitude;
 
-	RamenModel.fromJsonMap(Map<String, dynamic> map):
+
+	RamenModel({this.name, this.address, this.latitude, this.longitude});
+
+  RamenModel.fromJsonMap(Map<String, dynamic> map):
 		name = map["name"],
 		address = map["address"],
 		latitude = map["latitude"],

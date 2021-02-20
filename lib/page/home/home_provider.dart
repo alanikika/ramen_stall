@@ -25,7 +25,12 @@ class HomeProvider extends BaseProvider {
     } else {
       int id = await performInsertRamenStall();
       if (id > 0) {
+        RamenModel _model = RamenModel();
+        _model.name = ramenNameController.text;
+        _ramenData.add(_model);
+
         ramenNameController.clear();
+
         listener.onSuccess(id, reqId: ReqIds.INSERT_RAMEN);
       } else {
         listener.onFailure(Strings.insertRamenFailed);
@@ -34,9 +39,19 @@ class HomeProvider extends BaseProvider {
   }
 
   performInsertRamenStall() async {
-    Map<String, dynamic> data = HashMap();
-    data["name"] = ramenNameController.text;
-    return await dbHelper.insertRamenStall(data);
+    bool isExist = await getRamenByName();
+    if (!isExist) {
+      Map<String, dynamic> data = HashMap();
+      data["name"] = ramenNameController.text;
+      return await dbHelper.insertRamenStall(data);
+    } else {
+      ramenNameValidate = "Ramen stall name already exist";
+      notifyListeners();
+    }
+  }
+
+  Future<bool> getRamenByName() async {
+    return await dbHelper.isRamenExist(ramenNameController.text);
   }
 
   clearError() {
@@ -46,10 +61,10 @@ class HomeProvider extends BaseProvider {
   }
 
   performGetRamenStall() async {
-    try{
+    try {
       List<RamenModel> data = await dbHelper.getRamenStall();
       listener.onSuccess(data, reqId: ReqIds.GET_RAMEN);
-    } catch(e) {
+    } catch (e) {
       listener.onFailure(Strings.getDataFailed);
     }
   }

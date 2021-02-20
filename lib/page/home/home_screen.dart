@@ -9,6 +9,8 @@ import 'package:stall_noodle/common/strings.dart';
 import 'package:stall_noodle/common/styles.dart';
 import 'package:stall_noodle/model/ramen_model.dart';
 import 'package:stall_noodle/page/home/home_provider.dart';
+import 'package:stall_noodle/page/home/widget/empty_state.dart';
+import 'package:stall_noodle/page/home/widget/item_data.dart';
 import 'package:stall_noodle/widget/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:stall_noodle/widget/progressbar.dart';
@@ -58,75 +60,16 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                 ? ListView.builder(
                     itemCount: provider.getRamenData.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return _buildItem(index);
+                      return ItemData(
+                        homeProvider: _homeProvider,
+                        index: index,
+                      );
                     },
                   )
-                : _buildNoData();
+                : EmptyState();
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildItem(int index) {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: Dimens.standard_16,
-          ),
-          height: Dimens.standard_48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _homeProvider.getRamenData[index].name,
-                style: Style.ibmPleXSansRegular.copyWith(
-                  color: CustomColors.topText283D3F,
-                  fontSize: Dimens.standard_16,
-                  letterSpacing: .25,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Image.asset(
-                ImagePath.next,
-                height: Dimens.standard_12,
-                width: Dimens.standard_12,
-                color: CustomColors.neutral20E3033.withOpacity(.5),
-              )
-            ],
-          ),
-        ),
-        Divider(
-          height: Dimens.standard_0,
-          thickness: 1.0,
-        )
-      ],
-    );
-  }
-
-  //Show this widget when data is empty
-  Widget _buildNoData() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset(
-          ImagePath.noData,
-          height: Dimens.standard_240,
-          width: Dimens.standard_240,
-        ),
-        SizedBox(
-          height: Dimens.standard_8,
-        ),
-        Text(
-          Strings.noData,
-          style: Style.ibmPleXSansRegular.copyWith(
-            color: CustomColors.topText283D3F,
-            fontSize: Dimens.standard_24,
-            fontWeight: FontWeight.w500,
-          ),
-        )
-      ],
     );
   }
 
@@ -202,7 +145,6 @@ class _HomeScreenState extends BaseState<HomeScreen> {
         break;
       case ReqIds.INSERT_RAMEN:
         Navigator.pop(context);
-        debugPrint("insert success");
         break;
     }
     super.onSuccess(any);

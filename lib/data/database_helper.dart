@@ -52,4 +52,16 @@ class DatabaseHelper {
       return null;
     }
   }
+
+  Future<bool> isRamenExist(String ramenName) async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> data = await db.rawQuery(
+      "SELECT * FROM $tableStall WHERE $name=?",[ramenName]
+    );
+    if(data.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
