@@ -27,7 +27,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
   void initState() {
     _homeProvider = Provider.of<HomeProvider>(context, listen: false);
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      // ProgressBar.instance.showProgressbarWithContext(context);
+      ProgressBar.instance.showProgressbarWithContext(context);
       _homeProvider.listener = this;
       _homeProvider.performGetRamenStall();
     });
@@ -102,6 +102,8 @@ class _HomeScreenState extends BaseState<HomeScreen> {
               children: <Widget>[
                 TextField(
                   controller: _homeProvider.ramenNameController,
+                  keyboardType: TextInputType.text,
+                  textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
                     labelText: Strings.ramenStallName,
                     border: OutlineInputBorder(

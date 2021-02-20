@@ -7,6 +7,7 @@ import 'package:stall_noodle/common/strings.dart';
 import 'package:stall_noodle/data/database_helper.dart';
 import 'package:stall_noodle/model/ramen_model.dart';
 import 'package:stall_noodle/util/validate_input.dart';
+import 'package:stall_noodle/widget/progressbar.dart';
 
 class HomeProvider extends BaseProvider {
   TextEditingController ramenNameController = TextEditingController();
@@ -23,22 +24,31 @@ class HomeProvider extends BaseProvider {
       ramenNameValidate = nameValidation;
       notifyListeners();
     } else {
+      ProgressBar.instance.showProgressbar();
       int id = await performInsertRamenStall();
-      if (id > 0) {
-        RamenModel _model = RamenModel();
-        _model.name = ramenNameController.text;
-        _ramenData.add(_model);
+      if (id != null) {
+        if (id > 0) {
+          RamenModel _model = RamenModel();
+          _model.name = ramenNameController.text;
 
-        ramenNameController.clear();
+          if (_ramenData == null) {
+            _ramenData = List<RamenModel>();
+          }
+          _ramenData.add(_model);
 
-        listener.onSuccess(id, reqId: ReqIds.INSERT_RAMEN);
+          ramenNameController.clear();
+
+          listener.onSuccess(id, reqId: ReqIds.INSERT_RAMEN);
+        } else {
+          listener.onFailure(Strings.insertRamenFailed);
+        }
       } else {
-        listener.onFailure(Strings.insertRamenFailed);
+        ProgressBar.instance.hideProgressBar();
       }
     }
   }
 
-  performInsertRamenStall() async {
+  Future<dynamic> performInsertRamenStall() async {
     bool isExist = await getRamenByName();
     if (!isExist) {
       Map<String, dynamic> data = HashMap();
