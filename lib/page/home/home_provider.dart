@@ -5,15 +5,17 @@ import 'package:stall_noodle/base/base_provider.dart';
 import 'package:stall_noodle/common/req_id.dart';
 import 'package:stall_noodle/common/strings.dart';
 import 'package:stall_noodle/data/database_helper.dart';
+import 'package:stall_noodle/model/ramen_model.dart';
 import 'package:stall_noodle/util/validate_input.dart';
 
 class HomeProvider extends BaseProvider {
   TextEditingController ramenNameController = TextEditingController();
   String ramenNameValidate;
+  List<RamenModel> _ramenData;
 
   final dbHelper = DatabaseHelper.instance;
 
-  validateInsertRamen(BuildContext context) async {
+  validateInsertRamen() async {
     String nameValidation =
         ValidateInput().validateRamenName(ramenNameController.text);
 
@@ -23,6 +25,7 @@ class HomeProvider extends BaseProvider {
     } else {
       int id = await performInsertRamenStall();
       if (id > 0) {
+        ramenNameController.clear();
         listener.onSuccess(id, reqId: ReqIds.INSERT_RAMEN);
       } else {
         listener.onFailure(Strings.insertRamenFailed);
@@ -36,7 +39,25 @@ class HomeProvider extends BaseProvider {
     return await dbHelper.insertRamenStall(data);
   }
 
-  performGetRamenStall() async {
-    
+  clearError() {
+    if (ramenNameValidate != null) {
+      ramenNameValidate = null;
+    }
   }
+
+  performGetRamenStall() async {
+    try{
+      List<RamenModel> data = await dbHelper.getRamenStall();
+      listener.onSuccess(data, reqId: ReqIds.GET_RAMEN);
+    } catch(e) {
+      listener.onFailure(Strings.getDataFailed);
+    }
+  }
+
+  setRamenStallData(List<RamenModel> data) {
+    _ramenData = data;
+    notifyListeners();
+  }
+
+  List<RamenModel> get getRamenData => _ramenData;
 }

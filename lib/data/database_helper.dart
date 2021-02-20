@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:stall_noodle/data/schema/staller_schema.dart';
-
+import 'package:stall_noodle/model/ramen_model.dart';
 const dbName = "ramen_stall_db";
 
 class DatabaseHelper {
@@ -41,5 +41,15 @@ class DatabaseHelper {
   Future<int> insertRamenStall(Map<String, dynamic> data) async {
     Database db = await instance.database;
     return await db.insert(tableStall, data);
+  }
+
+  Future<List<RamenModel>> getRamenStall() async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> data = await db.query(tableStall);
+    if(data.length > 0) {
+      return data.map((data) => RamenModel.fromJsonMap(data)).toList();
+    } else {
+      return null;
+    }
   }
 }

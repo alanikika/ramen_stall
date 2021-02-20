@@ -4,8 +4,10 @@ import 'package:stall_noodle/base/base_state.dart';
 import 'package:stall_noodle/common/custom_colors.dart';
 import 'package:stall_noodle/common/dimens.dart';
 import 'package:stall_noodle/common/image_path.dart';
+import 'package:stall_noodle/common/req_id.dart';
 import 'package:stall_noodle/common/strings.dart';
 import 'package:stall_noodle/common/styles.dart';
+import 'package:stall_noodle/model/ramen_model.dart';
 import 'package:stall_noodle/page/home/home_provider.dart';
 import 'package:stall_noodle/widget/custom_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +27,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       // ProgressBar.instance.showProgressbarWithContext(context);
       _homeProvider.listener = this;
+      _homeProvider.performGetRamenStall();
     });
     super.initState();
   }
@@ -41,6 +44,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
+              _homeProvider.clearError();
               return _buildInputDialog(context);
             },
           );
@@ -50,15 +54,16 @@ class _HomeScreenState extends BaseState<HomeScreen> {
         width: MediaQuery.of(context).size.width,
         child: Consumer<HomeProvider>(
           builder: (context, provider, child) {
-            return _buildNoData();
+            return provider.getRamenData != null
+                ? ListView.builder(
+                    itemCount: provider.getRamenData.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _buildItem(index);
+                    },
+                  )
+                : _buildNoData();
           },
         ),
-        /* child: ListView.builder(
-          itemCount: 20,
-          itemBuilder: (BuildContext context, int index) {
-            return _buildItem(index);
-          },
-        ),*/
       ),
     );
   }
@@ -72,15 +77,22 @@ class _HomeScreenState extends BaseState<HomeScreen> {
           ),
           height: Dimens.standard_48,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Stall Name",
+                _homeProvider.getRamenData[index].name,
                 style: Style.ibmPleXSansRegular.copyWith(
                   color: CustomColors.topText283D3F,
                   fontSize: Dimens.standard_16,
                   letterSpacing: .25,
                   fontWeight: FontWeight.w500,
                 ),
+              ),
+              Image.asset(
+                ImagePath.next,
+                height: Dimens.standard_12,
+                width: Dimens.standard_12,
+                color: CustomColors.neutral20E3033.withOpacity(.5),
               )
             ],
           ),
@@ -120,58 +132,79 @@ class _HomeScreenState extends BaseState<HomeScreen> {
 
   //Input dialog
   Widget _buildInputDialog(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Dimens.standard_8),
-      ),
-      elevation: 0.0,
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.all(16.0),
-        margin: EdgeInsets.only(top: 16.0),
-        decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black,
-                  offset: Offset(0, 10),
-                  blurRadius: 10,),
-            ],),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              "Hai Bro",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Text(
-              "Lorem ipsum dollaro djsfndsakjnsa fdjsf",
-              style: TextStyle(fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(
-              height: 22,
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FlatButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  "Ok",
-                  style: TextStyle(fontSize: 18),
+    return Consumer<HomeProvider>(
+      builder: (context, provider, child) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Dimens.standard_4),
+          ),
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(Dimens.standard_16),
+            decoration: BoxDecoration(
+              color: CustomColors.whiteFFFFFF,
+              borderRadius: BorderRadius.circular(Dimens.standard_16),
+              boxShadow: [
+                BoxShadow(
+                  color: CustomColors.neutral20E3033.withOpacity(.5),
+                  offset: Offset(5.0, 10.0),
+                  blurRadius: 5.0,
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                TextField(
+                  controller: _homeProvider.ramenNameController,
+                  decoration: InputDecoration(
+                    labelText: Strings.ramenStallName,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: CustomColors.colorOrangeF7931D,
+                      ),
+                    ),
+                    errorText: _homeProvider.ramenNameValidate,
+                  ),
+                ),
+                SizedBox(
+                  height: Dimens.standard_8,
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    _homeProvider.validateInsertRamen();
+                  },
+                  color: CustomColors.colorOrangeF7931D,
+                  child: Text(
+                    Strings.add,
+                    style: Style.ibmPleXSansMedium.copyWith(
+                      color: CustomColors.whiteFFFFFF,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
+  }
+
+  @override
+  void onSuccess(any, {int reqId}) {
+    ProgressBar.instance.hideProgressBar();
+    switch (reqId) {
+      case ReqIds.GET_RAMEN:
+        List<RamenModel> data = any as List<RamenModel>;
+        _homeProvider.setRamenStallData(data);
+        break;
+      case ReqIds.INSERT_RAMEN:
+        Navigator.pop(context);
+        debugPrint("insert success");
+        break;
+    }
+    super.onSuccess(any);
   }
 }
