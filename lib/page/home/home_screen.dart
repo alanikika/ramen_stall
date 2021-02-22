@@ -5,6 +5,7 @@ import 'package:stall_noodle/common/custom_colors.dart';
 import 'package:stall_noodle/common/dimens.dart';
 import 'package:stall_noodle/common/image_path.dart';
 import 'package:stall_noodle/common/req_id.dart';
+import 'package:stall_noodle/common/routes.dart';
 import 'package:stall_noodle/common/strings.dart';
 import 'package:stall_noodle/common/styles.dart';
 import 'package:stall_noodle/model/ramen_model.dart';
@@ -138,7 +139,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
   }
 
   @override
-  void onSuccess(any, {int reqId}) {
+  void onSuccess(any, {int reqId}) async {
     ProgressBar.instance.hideProgressBar();
     switch (reqId) {
       case ReqIds.GET_RAMEN:
@@ -146,7 +147,12 @@ class _HomeScreenState extends BaseState<HomeScreen> {
         _homeProvider.setRamenStallData(data);
         break;
       case ReqIds.INSERT_RAMEN:
-        Navigator.pop(context);
+        int id = any as int;
+        await Navigator.popAndPushNamed(
+          context,
+          Routes.detail,
+          arguments: id,
+        );
         break;
     }
     super.onSuccess(any);

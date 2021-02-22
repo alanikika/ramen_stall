@@ -15,6 +15,7 @@ class Strings {
   static const String ramenMustBeFilled = "Name required to fill";
   static const String insertRamenFailed = "Insert ramen stall failed";
   static const String ramenStallName = "Ramen Stall Name";
+  static const String ramenStallTracker = "Ramen Stall Tracker";
 
 
 
