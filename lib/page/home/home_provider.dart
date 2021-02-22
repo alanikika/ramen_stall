@@ -85,4 +85,13 @@ class HomeProvider extends BaseProvider {
   }
 
   List<RamenModel> get getRamenData => _ramenData;
+
+  removeItemById(int id) async {
+    try {
+      int result = await dbHelper.deleteRamenById(id);
+      listener.onSuccess(result, reqId: ReqIds.DELETE_RAMEN);
+    } catch (e) {
+      listener.onFailure("Delete ramen stall failed");
+    }
+  }
 }

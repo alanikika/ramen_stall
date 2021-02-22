@@ -64,4 +64,9 @@ class DatabaseHelper {
       return false;
     }
   }
+
+  Future<int> deleteRamenById(int ramenId) async {
+    Database db = await instance.database;
+    return await db.delete(tableStall, where: "$id=?", whereArgs: [ramenId]);
+  }
 }

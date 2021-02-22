@@ -20,38 +20,44 @@ class ItemData extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        InkWell(
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              Routes.detail,
-              arguments: _homeProvider.getRamenData[index].id,
-            );
+        Dismissible(
+          key: Key(_homeProvider.getRamenData[index].toString()),
+          onDismissed: (direction) {
+            _homeProvider.getRamenData.removeAt(index);
           },
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: Dimens.standard_16,
-            ),
-            height: Dimens.standard_48,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _homeProvider.getRamenData[index].name,
-                  style: Style.ibmPleXSansRegular.copyWith(
-                    color: CustomColors.topText283D3F,
-                    fontSize: Dimens.standard_16,
-                    letterSpacing: .25,
-                    fontWeight: FontWeight.w500,
+          child: InkWell(
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                Routes.detail,
+                arguments: _homeProvider.getRamenData[index].id,
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: Dimens.standard_16,
+              ),
+              height: Dimens.standard_48,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _homeProvider.getRamenData[index].name,
+                    style: Style.ibmPleXSansRegular.copyWith(
+                      color: CustomColors.topText283D3F,
+                      fontSize: Dimens.standard_16,
+                      letterSpacing: .25,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                Image.asset(
-                  ImagePath.next,
-                  height: Dimens.standard_12,
-                  width: Dimens.standard_12,
-                  color: CustomColors.neutral20E3033.withOpacity(.5),
-                )
-              ],
+                  Image.asset(
+                    ImagePath.next,
+                    height: Dimens.standard_12,
+                    width: Dimens.standard_12,
+                    color: CustomColors.neutral20E3033.withOpacity(.5),
+                  )
+                ],
+              ),
             ),
           ),
         ),
