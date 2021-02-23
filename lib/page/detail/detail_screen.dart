@@ -25,6 +25,7 @@ class _DetailScreenState extends BaseState<DetailScreen> {
     _detailProvider.listener = this;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _detailProvider.performGetCurrentLocation();
+      // _checkPermissionAndService();
     });
     super.initState();
   }
@@ -42,12 +43,12 @@ class _DetailScreenState extends BaseState<DetailScreen> {
         child: Container(
           child: Consumer<DetailProvider>(
             builder: (context, provider, child) {
-              return GoogleMap(
+              return provider.getCurrentPosition != null ? GoogleMap(
                 mapType: MapType.normal,
                 zoomControlsEnabled: false,
                 initialCameraPosition: CameraPosition(
                   target: provider.getCurrentPosition,
-                  zoom: 4,
+                  zoom: 8,
                 ),
                 onMapCreated: (GoogleMapController controller) {
                   // _mapController = controller;
@@ -55,64 +56,54 @@ class _DetailScreenState extends BaseState<DetailScreen> {
                     CameraUpdate.newCameraPosition(
                       CameraPosition(
                         target: provider.getCurrentPosition,
-                        zoom: 10,
+                        zoom: 14,
                       ),
                     ),
                   );
                 },
-                myLocationButtonEnabled: false,
+                myLocationButtonEnabled: true,
                 myLocationEnabled: true,
                 onLongPress: (position) {},
-                onTap: (position) {},
-                // markers: state.markers,
-              );
+                onTap: (position) {
+                  _detailProvider.changeLocation(position);
+                },
+                markers: provider.getMarker,
+              ) : Container();
             },
           ),
         ),
       ),
     );
   }
-  /*@override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        backFlag: true,
-        title: Strings.ramenStallTracker,
-      ),
-      body: SafeArea(
-        left: false,
-        right: false,
-        child: Container(
-          child: GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: const LatLng(0, 0),
-              zoom: 2,
-            ),
-            markers: _markers.values.toSet(),
-          ),
-        ),
-      ),
-    );
-  }
 
-  final Map<String, Marker> _markers = {};
-  Future<void> _onMapCreated(GoogleMapController controller) async {
-    final googleOffices = await locations.getGoogleOffices();
-    setState(() {
-      _markers.clear();
-      for (final office in googleOffices.offices) {
-        final marker = Marker(
-          markerId: MarkerId(office.name),
-          position: LatLng(office.lat, office.lng),
-          infoWindow: InfoWindow(
-            title: office.name,
-            snippet: office.address,
-          ),
-        );
-        _markers[office.name] = marker;
+  /*_checkPermissionAndService() async {
+    bool _serviceEnabled;
+    LocationPermission _permission;
+
+    _serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!_serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    _permission = await Geolocator.checkPermission();
+    if (_permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permantly denied, we cannot request permissions.');
+    }
+
+    if (_permission == LocationPermission.denied) {
+      _permission = await Geolocator.requestPermission();
+      if (_permission != LocationPermission.whileInUse &&
+          _permission != LocationPermission.always) {
+        return Future.error(
+            'Location permissions are denied (actual value: $_permission).');
       }
-    });
+    }
   }*/
 
+  @override
+  void dispose() {
+    _detailProvider.setDefault();
+    super.dispose();
+  }
 }
