@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stall_noodle/common/custom_colors.dart';
 import 'package:stall_noodle/common/routes.dart';
 import 'package:stall_noodle/common/strings.dart';
+import 'package:stall_noodle/page/detail/detail_provider.dart';
 import 'package:stall_noodle/page/detail/detail_screen.dart';
 import 'package:stall_noodle/page/home/home_provider.dart';
 import 'package:stall_noodle/page/home/home_screen.dart';
@@ -18,6 +19,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (context) => HomeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DetailProvider(),
         ),
       ],
       child: GestureDetector(
