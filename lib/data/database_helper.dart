@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:stall_noodle/data/schema/staller_schema.dart';
 import 'package:stall_noodle/model/ramen_model.dart';
+
 const dbName = "ramen_stall_db";
 
 class DatabaseHelper {
@@ -46,8 +47,19 @@ class DatabaseHelper {
   Future<List<RamenModel>> getRamenStall() async {
     Database db = await instance.database;
     List<Map<String, dynamic>> data = await db.query(tableStall);
-    if(data.length > 0) {
+    if (data.length > 0) {
       return data.map((data) => RamenModel.fromJsonMap(data)).toList();
+    } else {
+      return null;
+    }
+  }
+
+  Future<RamenModel> getRamenStallById(int ramenId) async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> data = await db.rawQuery(
+        "SELECT * FROM $tableStall WHERE $id=?", [ramenId]);
+    if (data != null) {
+      return RamenModel.fromJsonMap(data[0]);
     } else {
       return null;
     }
@@ -55,10 +67,9 @@ class DatabaseHelper {
 
   Future<bool> isRamenExist(String ramenName) async {
     Database db = await instance.database;
-    List<Map<String, dynamic>> data = await db.rawQuery(
-      "SELECT * FROM $tableStall WHERE $name=?",[ramenName]
-    );
-    if(data.length > 0) {
+    List<Map<String, dynamic>> data = await db
+        .rawQuery("SELECT * FROM $tableStall WHERE $name=?", [ramenName]);
+    if (data.length > 0) {
       return true;
     } else {
       return false;
@@ -68,5 +79,14 @@ class DatabaseHelper {
   Future<int> deleteRamenById(int ramenId) async {
     Database db = await instance.database;
     return await db.delete(tableStall, where: "$id=?", whereArgs: [ramenId]);
+  }
+
+  Future<int> updateRamenById(
+      {int ramenId, double lat, double lon, String newAddress}) async {
+    Database db = await instance.database;
+    return await db.rawUpdate(
+      "UPDATE $tableStall SET $address=?, $latitude=?, $longitude=? WHERE $id=?",
+      [newAddress, lat, lon, ramenId],
+    );
   }
 }

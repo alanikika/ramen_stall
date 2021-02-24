@@ -30,6 +30,7 @@ class HomeProvider extends BaseProvider {
         if (id > 0) {
           RamenModel _model = RamenModel();
           _model.name = ramenNameController.text;
+          _model.id = id;
 
           if (_ramenData == null) {
             _ramenData = List<RamenModel>();

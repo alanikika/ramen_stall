@@ -24,7 +24,7 @@ class _DetailScreenState extends BaseState<DetailScreen> {
     _detailProvider = Provider.of<DetailProvider>(context, listen: false);
     _detailProvider.listener = this;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _detailProvider.performGetCurrentLocation();
+      _detailProvider.performGetCurrentLocation(widget.id);
       // _checkPermissionAndService();
     });
     super.initState();
@@ -43,34 +43,40 @@ class _DetailScreenState extends BaseState<DetailScreen> {
         child: Container(
           child: Consumer<DetailProvider>(
             builder: (context, provider, child) {
-              return provider.getCurrentPosition != null ? GoogleMap(
-                zoomGesturesEnabled: true,
-                tiltGesturesEnabled: false,
-                zoomControlsEnabled: false,
-                mapType: MapType.normal,
-                initialCameraPosition: CameraPosition(
-                  target: provider.getCurrentPosition,
-                  zoom: 8,
-                ),
-                onMapCreated: (GoogleMapController controller) {
-                  // _mapController = controller;
-                  controller.animateCamera(
-                    CameraUpdate.newCameraPosition(
-                      CameraPosition(
-                        target: provider.getCurrentPosition,
-                        zoom: 14,
+              return provider.getUserPosition != null
+                  ? GoogleMap(
+                      zoomGesturesEnabled: true,
+                      tiltGesturesEnabled: false,
+                      zoomControlsEnabled: false,
+                      mapType: MapType.normal,
+                      initialCameraPosition: CameraPosition(
+                        target: provider.getUserPosition,
+                        zoom: 8,
                       ),
-                    ),
-                  );
-                },
-                myLocationButtonEnabled: true,
-                myLocationEnabled: true,
-                onLongPress: (position) {},
-                onTap: (position) {
-                  _detailProvider.changeLocation(position);
-                },
-                markers: provider.getMarker,
-              ) : Container();
+                      onMapCreated: (GoogleMapController controller) {
+                        // _mapController = controller;
+                        controller.animateCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: provider.getMarkerPosition ??
+                                  provider.getUserPosition,
+                              zoom: 14,
+                            ),
+                          ),
+                        );
+                      },
+                      myLocationButtonEnabled: true,
+                      myLocationEnabled: true,
+                      onLongPress: (position) {},
+                      onTap: (position) {
+                        _detailProvider.changeLocation(
+                          position: position,
+                          ramenId: widget.id,
+                        );
+                      },
+                      markers: provider.getMarker,
+                    )
+                  : Container();
             },
           ),
         ),
