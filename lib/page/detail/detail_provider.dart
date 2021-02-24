@@ -98,5 +98,6 @@ class DetailProvider extends BaseProvider {
   setDefault() {
     _userPosition = null;
     _markers = null;
+    _markerPosition = null;
   }
 }

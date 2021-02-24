@@ -21,10 +21,16 @@ class ItemData extends StatelessWidget {
     return Column(
       children: [
         Dismissible(
-          key: Key(_homeProvider.getRamenData[index].toString()),
+          key: Key(_homeProvider.getRamenData[index].id.toString()),
+          background: SizedBox(),
+          secondaryBackground: slideLeftBackground(),
           onDismissed: (direction) {
-            _homeProvider.getRamenData.removeAt(index);
+            _homeProvider.removeItemById(
+              id: _homeProvider.getRamenData[index].id,
+              index: index,
+            );
           },
+          direction: DismissDirection.endToStart,
           child: InkWell(
             onTap: () {
               Navigator.pushNamed(
@@ -66,6 +72,35 @@ class ItemData extends StatelessWidget {
           thickness: 1.0,
         )
       ],
+    );
+  }
+
+  Widget slideLeftBackground() {
+    return Container(
+      color: Colors.red,
+      child: Align(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            Text(
+              " Delete",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.right,
+            ),
+            SizedBox(
+              width: 20,
+            ),
+          ],
+        ),
+        alignment: Alignment.centerRight,
+      ),
     );
   }
 }

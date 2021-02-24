@@ -148,7 +148,6 @@ class _HomeScreenState extends BaseState<HomeScreen> {
         break;
       case ReqIds.INSERT_RAMEN:
         int id = any as int;
-        debugPrint("id ramen: $id");
         await Navigator.popAndPushNamed(
           context,
           Routes.detail,
