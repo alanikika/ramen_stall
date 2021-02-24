@@ -44,8 +44,10 @@ class _DetailScreenState extends BaseState<DetailScreen> {
           child: Consumer<DetailProvider>(
             builder: (context, provider, child) {
               return provider.getCurrentPosition != null ? GoogleMap(
-                mapType: MapType.normal,
+                zoomGesturesEnabled: true,
+                tiltGesturesEnabled: false,
                 zoomControlsEnabled: false,
+                mapType: MapType.normal,
                 initialCameraPosition: CameraPosition(
                   target: provider.getCurrentPosition,
                   zoom: 8,
