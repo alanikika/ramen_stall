@@ -12,7 +12,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="stall_noodle"
+        android:label="Ramen Stall"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
