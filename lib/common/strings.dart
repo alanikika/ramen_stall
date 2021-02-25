@@ -16,6 +16,8 @@ class Strings {
   static const String insertRamenFailed = "Insert ramen stall failed";
   static const String ramenStallName = "Ramen Stall Name";
   static const String ramenStallTracker = "Ramen Stall Tracker";
+  static const String searchLocation = "Search Location";
+  static const String failedSearchLocation = "Failed to search location";
 
 
 

@@ -1,14 +1,23 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_webservice/places.dart';
 import 'package:stall_noodle/base/base_provider.dart';
+import 'package:stall_noodle/common/strings.dart';
 import 'package:stall_noodle/data/database_helper.dart';
 import 'package:stall_noodle/model/ramen_model.dart';
 
 class DetailProvider extends BaseProvider {
-  LatLng _userPosition, _markerPosition;
+  LatLng _userPosition, _cameraOrMarkerPosition;
   Set<Marker> _markers;
   RamenModel _ramenData;
+  String _locationName;
+  bool init = true;
+
+  static const String _mapsKey = "AIzaSyD0c4OSqLwY6yy7IIWPYx-MKq4YFhfFRu0";
+  GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: _mapsKey);
 
   final dbHelper = DatabaseHelper.instance;
 
@@ -18,7 +27,7 @@ class DetailProvider extends BaseProvider {
       _ramenData = await _getRamenStallById(id);
 
       if (_ramenData.latitude != null && _ramenData.latitude != null) {
-        _markerPosition = LatLng(
+        _cameraOrMarkerPosition = LatLng(
           double.parse(_ramenData.latitude),
           double.parse(_ramenData.longitude),
         );
@@ -27,7 +36,7 @@ class DetailProvider extends BaseProvider {
         _markers.add(
           _addMarker(
             name: _ramenData.name,
-            position: _markerPosition,
+            position: _cameraOrMarkerPosition,
             address: _ramenData.address,
           ),
         );
@@ -51,7 +60,7 @@ class DetailProvider extends BaseProvider {
 
   LatLng get getUserPosition => _userPosition;
 
-  LatLng get getMarkerPosition => _markerPosition;
+  LatLng get getMarkerPosition => _cameraOrMarkerPosition;
 
   changeLocation({int ramenId, LatLng position}) async {
     final coordinate = Coordinates(position.latitude, position.longitude);
@@ -77,6 +86,8 @@ class DetailProvider extends BaseProvider {
           address: address.first.addressLine,
         ),
       );
+      _cameraOrMarkerPosition = LatLng(position.latitude, position.longitude);
+      init = false;
     }
     notifyListeners();
   }
@@ -95,9 +106,42 @@ class DetailProvider extends BaseProvider {
     );
   }
 
+  searchLocation(BuildContext context) async {
+    Prediction prediction = await PlacesAutocomplete.show(
+      context: context,
+      apiKey: _mapsKey,
+      mode: Mode.overlay, // Mode.overlay
+      language: "id",
+      onError: onError,
+      components: [Component(Component.country, "id")],
+    );
+
+    if (prediction != null) {
+      PlacesDetailsResponse placeResponse =
+          await _places.getDetailsByPlaceId(prediction.placeId);
+      final location = placeResponse.result.geometry.location;
+
+      _locationName = placeResponse.result.name;
+      _cameraOrMarkerPosition = LatLng(location.lat, location.lng);
+
+      init = false;
+      notifyListeners();
+    } else {
+      listener.onFailure(Strings.failedSearchLocation);
+    }
+  }
+
+  String get getSearch => _locationName;
+
+  void onError(PlacesAutocompleteResponse response) {
+    listener.onFailure(Strings.failedSearchLocation);
+  }
+
   setDefault() {
     _userPosition = null;
     _markers = null;
-    _markerPosition = null;
+    _cameraOrMarkerPosition = null;
+    _locationName = null;
+    init = true;
   }
 }

@@ -26,8 +26,8 @@ class HomeProvider extends BaseProvider {
     } else {
       ProgressBar.instance.showProgressbar();
       int id = await performInsertRamenStall();
-      if (id != null) {
-        if (id > 0) {
+      if(id != null) {
+        try {
           RamenModel _model = RamenModel();
           _model.name = ramenNameController.text;
           _model.id = id;
@@ -40,7 +40,7 @@ class HomeProvider extends BaseProvider {
           ramenNameController.clear();
 
           listener.onSuccess(id, reqId: ReqIds.INSERT_RAMEN);
-        } else {
+        } catch (e) {
           listener.onFailure(Strings.insertRamenFailed);
         }
       } else {
@@ -65,9 +65,12 @@ class HomeProvider extends BaseProvider {
     return await dbHelper.isRamenExist(ramenNameController.text);
   }
 
-  clearError() {
+  clearInput() {
     if (ramenNameValidate != null) {
       ramenNameValidate = null;
+    }
+    if(ramenNameController.text.isNotEmpty) {
+      ramenNameController.clear();
     }
   }
 

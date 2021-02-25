@@ -47,7 +47,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              _homeProvider.clearError();
+              _homeProvider.clearInput();
               return _buildInputDialog(context);
             },
           );
